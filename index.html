@@ -1,0 +1,286 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tobacco Truth - Match the Facts</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f8fb;
+  color: #203040;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
+}
+
+h1 {
+  color: #15324b;
+}
+
+p {
+  color: #617386;
+}
+
+.game {
+  max-width: 850px;
+  margin: auto;
+  background: white;
+  padding: 25px;
+  border-radius: 16px;
+}
+
+button {
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.new-game {
+  background: #15324b;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  margin: 15px;
+  font-weight: bold;
+}
+
+.match-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.match-card {
+  min-height: 95px;
+  padding: 15px;
+  border: 2px solid #cbdbe5;
+  border-radius: 12px;
+  background: #f8fbfd;
+  color: #203040;
+  font-weight: bold;
+}
+
+.match-card.selected {
+  background: #e9f5fc;
+  border-color: #1677b8;
+}
+
+.match-card.matched {
+  background: #eaf7ef;
+  border-color: #237b54;
+  cursor: default;
+}
+
+#feedback {
+  font-weight: bold;
+  min-height: 30px;
+  margin-top: 18px;
+}
+
+@media (max-width: 550px) {
+  .match-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+<h1>🧩 Match the Facts</h1>
+
+<p>
+Turn over two cards and match each tobacco-related
+term to its correct explanation!
+</p>
+
+<button class="new-game" onclick="newGame()">
+Shuffle / New Game
+</button>
+
+<p>
+<strong id="score">Matches: 0 / 8</strong>
+&nbsp; | &nbsp;
+<strong id="moves">Moves: 0</strong>
+</p>
+
+<div id="matchGrid" class="match-grid"></div>
+
+<div id="feedback">
+Select any two cards to find a match!
+</div>
+
+</div>
+
+<script>
+
+const pairs = [
+["NICOTINE",
+"An addictive substance found in tobacco."],
+
+["SECONDHAND SMOKE",
+"Smoke breathed in by people nearby."],
+
+["MISINFORMATION",
+"False or misleading information."],
+
+["QUITLINE",
+"A service that offers help with quitting."],
+
+["AEROSOL",
+"A mist from vaping that can contain nicotine and other substances."],
+
+["FDA",
+"A U.S. agency that regulates tobacco products."],
+
+["ADDICTION",
+"Difficulty stopping use despite harmful effects."],
+
+["FACT-CHECK",
+"Compare a claim with reliable evidence."]
+];
+
+let chosen = [];
+let matched = new Set();
+let moves = 0;
+let busy = false;
+
+function newGame() {
+
+  chosen = [];
+  matched = new Set();
+  moves = 0;
+  busy = false;
+
+  document.getElementById("moves").textContent = "Moves: 0";
+  document.getElementById("score").textContent = "Matches: 0 / 8";
+  document.getElementById("feedback").textContent =
+    "Select any two cards to find a match!";
+
+  let deck = [];
+
+  pairs.forEach((pair, index) => {
+    deck.push({
+      id: index,
+      side: 0,
+      text: pair[0]
+    });
+
+    deck.push({
+      id: index,
+      side: 1,
+      text: pair[1]
+    });
+  });
+
+  deck.sort(() => Math.random() - 0.5);
+
+  const grid = document.getElementById("matchGrid");
+  grid.innerHTML = "";
+
+  deck.forEach(card => {
+
+    const button = document.createElement("button");
+
+    button.className = "match-card";
+    button.textContent = "❔ Tap to Reveal";
+
+    button.dataset.id = card.id;
+    button.dataset.side = card.side;
+    button.dataset.text = card.text;
+
+    button.onclick = () => flipCard(button);
+
+    grid.appendChild(button);
+
+  });
+}
+
+function flipCard(card) {
+
+  if (
+    busy ||
+    card.classList.contains("matched") ||
+    chosen.includes(card)
+  ) {
+    return;
+  }
+
+  card.textContent = card.dataset.text;
+  card.classList.add("selected");
+
+  chosen.push(card);
+
+  if (chosen.length === 2) {
+
+    moves++;
+
+    document.getElementById("moves").textContent =
+      "Moves: " + moves;
+
+    const first = chosen[0];
+    const second = chosen[1];
+
+    if (
+      first.dataset.id === second.dataset.id &&
+      first.dataset.side !== second.dataset.side
+    ) {
+
+      first.classList.remove("selected");
+      second.classList.remove("selected");
+
+      first.classList.add("matched");
+      second.classList.add("matched");
+
+      matched.add(first.dataset.id);
+
+      document.getElementById("score").textContent =
+        "Matches: " + matched.size + " / 8";
+
+      document.getElementById("feedback").textContent =
+        "Great match! " +
+        pairs[Number(first.dataset.id)][1];
+
+      chosen = [];
+
+      if (matched.size === 8) {
+        document.getElementById("feedback").textContent =
+          "🎉 Congratulations! You matched all 8 pairs in " +
+          moves + " moves!";
+      }
+
+    } else {
+
+      busy = true;
+
+      document.getElementById("feedback").textContent =
+        "Not a match! Try to remember the cards.";
+
+      setTimeout(() => {
+
+        chosen.forEach(card => {
+          card.textContent = "❔ Tap to Reveal";
+          card.classList.remove("selected");
+        });
+
+        chosen = [];
+        busy = false;
+
+      }, 1000);
+
+    }
+  }
+}
+
+newGame();
+
+</script>
+
+</body>
+</html>
