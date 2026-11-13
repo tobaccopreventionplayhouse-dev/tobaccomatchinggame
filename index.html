@@ -46,27 +46,33 @@ button {
   margin: 15px;
   font-weight: bold;
 }
-
 .match-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
 }
-
 .match-card {
-  min-height: 95px;
-  padding: 15px;
-  border: 2px solid #cbdbe5;
-  border-radius: 12px;
-  background: #f8fbfd;
-  color: #203040;
-  font-weight: bold;
-}
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    height: auto;
+    min-height: unset;
+    padding: 10px;
+    box-sizing: border-box;
 
+    border: 2px solid #55a6a0;
+    border-radius: 12px;
+    background: #d9f2ef;
+    color: #174d49;
+
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
 .match-card.selected {
-  background: #e9f5fc;
-  border-color: #1677b8;
+  background: #d9f2ef;
+  border-color: #174d49;
 }
 
 .match-card.matched {
